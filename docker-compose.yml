@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    image: bilibili-live-tools-ui:latest
+    container_name: bilibili-live-tools-ui
+    ports:
+      - "8880:80"
+    restart: unless-stopped
+
