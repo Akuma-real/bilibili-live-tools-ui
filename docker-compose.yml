@@ -1,11 +1,12 @@
-version: '3'
+version: '3.8'
 
 services:
-  web:
-    build: .
-    image: bilibili-live-tools-ui:latest
-    container_name: bilibili-live-tools-ui
+  app:
+    image: ghcr.io/${GITHUB_REPOSITORY,,}:latest
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
     ports:
-      - "8880:80"
-    restart: unless-stopped
-
+      - "80:80"

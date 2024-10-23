@@ -29,5 +29,16 @@ RUN pnpm install && \
 
 FROM caddy:2-alpine
 
-# 只复制构建产物
+# 安装 envsubst 工具
+RUN apk add --no-cache gettext
+
+# 复制构建产物
 COPY --from=builder /app/dist /usr/share/caddy
+
+# 添加环境变量替换脚本
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# 设置入口点
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
