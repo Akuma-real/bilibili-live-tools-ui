@@ -1,30 +1,35 @@
-import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
 import { message } from 'antd';
 
 const request = axios.create({
-  baseURL: 'https://bili-monitor.june.ink',
+  baseURL: '/api',
   timeout: 10000,
 });
 
-request.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const apiKey = localStorage.getItem('apiKey');
-  if (apiKey && config.headers) {
-    config.headers['X-API-Key'] = apiKey;
+// 请求拦截器
+request.interceptors.request.use(
+  (config) => {
+    const encryptedApiKey = localStorage.getItem('apiKey');
+    if (encryptedApiKey) {
+      const apiKey = atob(encryptedApiKey); // 解密
+      config.headers['X-API-Key'] = apiKey;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
+// 响应拦截器
 request.interceptors.response.use(
-  (response: AxiosResponse) => response.data,
-  (error: any) => {
+  (response) => response.data,
+  (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('apiKey');
       window.location.href = '/login';
-      message.error('API Key 无效，请重新输入');
-    } else {
-      message.error('请求失败，请检查网络连接');
     }
-    return Promise.reject(error);
+    return Promise.reject(error.response?.data || error);
   }
 );
 

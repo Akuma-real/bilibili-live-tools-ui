@@ -3,12 +3,11 @@ import { Card, Table, Button, Input, Space, Popconfirm, message, Tag, Result } f
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import request from '../utils/request';
 import { useMediaQuery } from '../hooks/useMediaQuery';
+import type { LiverInfo } from '../types/api';
 
-interface Subscriber {
+interface Subscriber extends LiverInfo {
   mid: string;
-  name: string;
   status: string;
-  face?: string;  // 可选的头像URL
 }
 
 const Subscribers: React.FC = () => {
@@ -19,9 +18,18 @@ const Subscribers: React.FC = () => {
   // 获取订阅列表
   const { data: subscribers = [], isLoading, error } = useQuery<Subscriber[]>({
     queryKey: ['subscribers'],
-    queryFn: () => request.get('/monitor/subscribers'),
-    retry: 3,  // 失败时重试3次
-    staleTime: 30000,  // 30秒内不重新请求
+    queryFn: async () => {
+      const response = await request.get('/monitor/subscribers');
+      // 转换数据结构以匹配 LiverInfo
+      return response.map((sub: any) => ({
+        ...sub,
+        uid: parseInt(sub.mid),
+        is_live: sub.status === '1',
+        live_status: sub.status === '1' ? 1 : 0
+      }));
+    },
+    retry: 3,
+    staleTime: 30000,
   });
 
   // 添加订阅
@@ -74,8 +82,8 @@ const Subscribers: React.FC = () => {
   const columns = [
     {
       title: 'UID',
-      dataIndex: 'mid',
-      key: 'mid',
+      dataIndex: 'uid',
+      key: 'uid',
       width: isMobile ? 100 : 120,
     },
     {
@@ -103,20 +111,28 @@ const Subscribers: React.FC = () => {
     },
     {
       title: '状态',
-      dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: (status: string) => {
+      render: (_: any, record: Subscriber) => {
         let color = 'default';
         let text = '未知';
-        if (status === '1') {
+        if (record.is_live) {
           color = 'success';
           text = '直播中';
-        } else if (status === '0') {
+        } else if (record.live_status === 0) {
           color = 'default';
           text = '未开播';
         }
-        return <Tag color={color}>{text}</Tag>;
+        return (
+          <Space>
+            <Tag color={color}>{text}</Tag>
+            {record.is_live && record.title && (
+              <span style={{ fontSize: '12px', color: '#666' }}>
+                {record.title}
+              </span>
+            )}
+          </Space>
+        );
       },
     },
     {
@@ -190,7 +206,7 @@ const Subscribers: React.FC = () => {
         <Table
           columns={columns}
           dataSource={subscribers}
-          rowKey="mid"
+          rowKey="uid"
           loading={isLoading}
           pagination={false}
           scroll={{ x: isMobile ? 500 : undefined }}

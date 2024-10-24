@@ -1,58 +1,53 @@
 import React from 'react';
-import { Form, Input, Button, Card, message } from 'antd';
-import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { Card, Form, Input, Button, message } from 'antd';
+import { useAuth } from '../contexts/AuthContext';
 import request from '../utils/request';
-import { InternalAxiosRequestConfig, AxiosHeaders } from 'axios';
 
 const Login: React.FC = () => {
-  const navigate = useNavigate();
-  
-  const verifyApiKey = useMutation({
-    mutationFn: async (values: { apiKey: string }) => {
+  const { login } = useAuth();
+  const [loading, setLoading] = React.useState(false);
+
+  const handleSubmit = async (values: { apiKey: string }) => {
+    setLoading(true);
+    try {
       // 验证 API Key
-      const config: InternalAxiosRequestConfig = {
-        headers: new AxiosHeaders({
-          'X-API-Key': values.apiKey
-        })
-      };
-      const response = await request.get('/config/', config);
-      // 如果请求成功，说明 API Key 有效
-      localStorage.setItem('apiKey', values.apiKey);
-      return response;
-    },
-    onSuccess: () => {
+      await request.get('/auth/verify', {
+        headers: { 'X-API-Key': values.apiKey }
+      });
+      login(values.apiKey);
       message.success('登录成功');
-      navigate('/dashboard');
+    } catch (error) {
+      message.error('API Key 无效');
+    } finally {
+      setLoading(false);
     }
-  });
+  };
 
   return (
-    <div style={{ 
-      height: '100vh', 
-      display: 'flex', 
-      justifyContent: 'center', 
+    <div style={{
+      height: '100vh',
+      display: 'flex',
+      justifyContent: 'center',
       alignItems: 'center',
-      background: '#f0f2f5' 
+      background: '#f0f2f5'
     }}>
-      <Card title="BLV 监控系统" style={{ width: 400 }}>
+      <Card title="登录" style={{ width: 300 }}>
         <Form
-          name="login"
-          onFinish={verifyApiKey.mutate}
+          layout="vertical"
+          onFinish={handleSubmit}
         >
           <Form.Item
             name="apiKey"
+            label="API Key"
             rules={[{ required: true, message: '请输入 API Key' }]}
           >
-            <Input.Password 
-              placeholder="请输入 API Key" 
-            />
+            <Input.Password placeholder="请输入 API Key" />
           </Form.Item>
           <Form.Item>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
-              loading={verifyApiKey.isPending}
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
               block
             >
               登录

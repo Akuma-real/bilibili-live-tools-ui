@@ -6,7 +6,9 @@ import Login from './pages/Login';
 import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
-import Subscribers from './pages/Subscribers';  // 添加新的导入
+import Subscribers from './pages/Subscribers';
+import { AuthProvider } from './contexts/AuthContext';
+import { PrivateRoute } from './components/PrivateRoute';
 
 const queryClient = new QueryClient();
 
@@ -22,15 +24,24 @@ function App() {
         }}
       >
         <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<MainLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="subscribers" element={<Subscribers />} />  {/* 添加新的路由 */}
-              <Route path="settings" element={<Settings />} />
-            </Route>
-          </Routes>
+          <AuthProvider>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/"
+                element={
+                  <PrivateRoute>
+                    <MainLayout />
+                  </PrivateRoute>
+                }
+              >
+                <Route index element={<Dashboard />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="subscribers" element={<Subscribers />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+            </Routes>
+          </AuthProvider>
         </BrowserRouter>
       </ConfigProvider>
     </QueryClientProvider>
