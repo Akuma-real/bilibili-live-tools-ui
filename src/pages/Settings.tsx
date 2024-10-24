@@ -6,14 +6,6 @@ import request from '../utils/request';
 
 const { TextArea } = Input;
 
-interface Config {
-  cloudflare_domain: string;
-  cloudflare_auth_code: string;
-  server_chan_key: string;
-  bilibili_cookies: string;
-  check_interval: string;
-}
-
 const Settings: React.FC = () => {
   const [form] = Form.useForm<MonitorConfig>();
 
@@ -28,11 +20,7 @@ const Settings: React.FC = () => {
   // 更新配置
   const updateConfig = useMutation({
     mutationFn: (values: MonitorConfig) => {
-      const payload = {
-        ...values,
-        monitor_mids: JSON.stringify(values.monitor_mids)
-      };
-      return request.post('/config/update', payload);
+      return request.post('/config/update', values);
     },
     onSuccess: () => {
       message.success('配置已更新');
@@ -43,10 +31,11 @@ const Settings: React.FC = () => {
   React.useEffect(() => {
     if (configData) {
       form.setFieldsValue({
-        monitor_mids: configData.monitor_mids.replace(/[\[\]"]/g, '').split(','),
         check_interval: parseInt(configData.check_interval),
         bilibili_cookies: configData.bilibili_cookies,
-        server_chan_key: configData.server_chan_key
+        server_chan_key: configData.server_chan_key,
+        cloudflare_domain: configData.cloudflare_domain,
+        cloudflare_auth_code: configData.cloudflare_auth_code
       });
     }
   }, [configData, form]);
@@ -91,9 +80,12 @@ const Settings: React.FC = () => {
             key={item.key}
             label={item.label}
             name={item.key}
-            rules={[{ required: true, message: '请输入要监控的主播 UID' }]}
+            rules={[{ required: true, message: `请输入${item.label}` }]}
           >
-            {item.type === 'text' ? <Input placeholder="请输入" /> : item.type === 'password' ? <Input.Password placeholder="请输入" /> : item.type === 'textarea' ? <TextArea autoSize={{ minRows: 2 }} /> : <InputNumber min={30} max={3600} style={{ width: 200 }} />}
+            {item.type === 'text' ? <Input placeholder="请输入" /> : 
+             item.type === 'password' ? <Input.Password placeholder="请输入" /> : 
+             item.type === 'textarea' ? <TextArea autoSize={{ minRows: 2 }} /> : 
+             <InputNumber min={30} max={3600} style={{ width: 200 }} />}
           </Form.Item>
         ))}
         <Form.Item>
