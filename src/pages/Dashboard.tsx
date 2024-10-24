@@ -1,28 +1,37 @@
 import React from 'react';
 import { Card, Table, Tag, Button, Space } from 'antd';
 import { useQuery } from '@tanstack/react-query';
-import type { MonitorStatus } from '../types/api';
 import request from '../utils/request';
+import type { MonitorStatus, LiverStatus } from '../types/api';
 
 const Dashboard: React.FC = () => {
-  const { data: monitorStatus, refetch } = useQuery<MonitorStatus>({
-    queryKey: ['monitor-status'],
+  const { data: monitorData } = useQuery<MonitorStatus>({
+    queryKey: ['monitor'],
     queryFn: async () => {
       const response = await request.get<MonitorStatus>('/monitor/status');
       return response;
     },
-    refetchInterval: 30000 // 每30秒自动刷新一次
+    refetchInterval: 10000, // 每10秒刷新一次
   });
+
+  const liverList = React.useMemo(() => {
+    if (!monitorData?.status_cache) return [];
+    return Object.entries(monitorData.status_cache).map(([mid, status]) => ({
+      key: mid,
+      ...status,
+      mid
+    }));
+  }, [monitorData]);
 
   // 转换数据格式以适应表格
   const livers = React.useMemo(() => {
-    if (!monitorStatus?.status_cache) return [];
-    return Object.entries(monitorStatus.status_cache).map(([uid, status]) => ({
+    if (!monitorData?.status_cache) return [];
+    return Object.entries(monitorData.status_cache).map(([uid, status]) => ({
       uid,
       ...status,
       is_live: status.status === 1
     }));
-  }, [monitorStatus]);
+  }, [monitorData]);
 
   const columns = [
     {

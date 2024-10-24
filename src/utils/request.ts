@@ -1,5 +1,4 @@
-import axios from 'axios';
-import type { AxiosRequestConfig } from 'axios';
+import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 
 const request = axios.create({
   baseURL: '/api',
@@ -8,14 +7,12 @@ const request = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig) => {
     const encryptedApiKey = localStorage.getItem('apiKey');
     if (encryptedApiKey) {
       const apiKey = atob(encryptedApiKey); // 解密
-      config.headers = {
-        ...config.headers,
-        'X-API-Key': apiKey
-      };
+      config.headers = config.headers || {};
+      config.headers['X-API-Key'] = apiKey;
     }
     return config;
   },
@@ -26,7 +23,7 @@ request.interceptors.request.use(
 
 // 响应拦截器
 request.interceptors.response.use(
-  (response) => response.data,
+  (response: AxiosResponse) => response.data,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('apiKey');
@@ -35,5 +32,14 @@ request.interceptors.response.use(
     return Promise.reject(error.response?.data || error);
   }
 );
+
+// 添加类型声明
+declare module 'axios' {
+  export interface AxiosInstance {
+    get<T = any>(url: string, config?: InternalAxiosRequestConfig): Promise<T>;
+    post<T = any>(url: string, data?: any, config?: InternalAxiosRequestConfig): Promise<T>;
+    delete<T = any>(url: string, config?: InternalAxiosRequestConfig): Promise<T>;
+  }
+}
 
 export default request;

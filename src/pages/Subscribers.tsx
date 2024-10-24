@@ -19,8 +19,7 @@ const Subscribers: React.FC = () => {
   const { data: subscribers = [], isLoading, error } = useQuery<Subscriber[]>({
     queryKey: ['subscribers'],
     queryFn: async () => {
-      const response = await request.get('/monitor/subscribers');
-      // 转换数据结构以匹配 LiverInfo
+      const response = await request.get<any[]>('/monitor/subscribers');
       return response.map((sub: any) => ({
         ...sub,
         uid: parseInt(sub.mid),
