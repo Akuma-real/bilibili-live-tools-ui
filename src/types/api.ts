@@ -28,6 +28,7 @@ export interface LiverInfo {
   title?: string;
   area_name?: string;
   online?: number;
+  face?: string;  // 添加头像属性
 }
 
 export interface MonitorConfig {

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { message } from 'antd';
+import type { AxiosRequestConfig } from 'axios';
 
 const request = axios.create({
   baseURL: '/api',
@@ -8,11 +8,14 @@ const request = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(
-  (config) => {
+  (config: AxiosRequestConfig) => {
     const encryptedApiKey = localStorage.getItem('apiKey');
     if (encryptedApiKey) {
       const apiKey = atob(encryptedApiKey); // 解密
-      config.headers['X-API-Key'] = apiKey;
+      config.headers = {
+        ...config.headers,
+        'X-API-Key': apiKey
+      };
     }
     return config;
   },
@@ -32,13 +35,5 @@ request.interceptors.response.use(
     return Promise.reject(error.response?.data || error);
   }
 );
-
-// 添加类型声明
-declare module 'axios' {
-  export interface AxiosInstance {
-    get<T = any>(url: string, config?: InternalAxiosRequestConfig): Promise<T>;
-    post<T = any>(url: string, data?: any, config?: InternalAxiosRequestConfig): Promise<T>;
-  }
-}
 
 export default request;

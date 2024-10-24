@@ -12,7 +12,9 @@ const Login: React.FC = () => {
     try {
       // 验证 API Key
       await request.get('/auth/verify', {
-        headers: { 'X-API-Key': values.apiKey }
+        headers: {
+          'X-API-Key': values.apiKey
+        } as any
       });
       login(values.apiKey);
       message.success('登录成功');
