@@ -6,6 +6,14 @@ import request from '../utils/request';
 
 const { TextArea } = Input;
 
+interface Config {
+  cloudflare_domain: string;
+  cloudflare_auth_code: string;
+  server_chan_key: string;
+  bilibili_cookies: string;
+  check_interval: string;
+}
+
 const Settings: React.FC = () => {
   const [form] = Form.useForm<MonitorConfig>();
 
@@ -43,6 +51,34 @@ const Settings: React.FC = () => {
     }
   }, [configData, form]);
 
+  const configItems = [
+    {
+      key: 'cloudflare_domain',
+      label: 'Cloudflare 域名',
+      type: 'text',
+    },
+    {
+      key: 'cloudflare_auth_code',
+      label: 'Cloudflare 授权码',
+      type: 'password',
+    },
+    {
+      key: 'server_chan_key',
+      label: 'Server酱 Key',
+      type: 'text',
+    },
+    {
+      key: 'bilibili_cookies',
+      label: 'B站 Cookies',
+      type: 'textarea',
+    },
+    {
+      key: 'check_interval',
+      label: '检查间隔(秒)',
+      type: 'number',
+    }
+  ];
+
   return (
     <Card title="系统配置">
       <Form
@@ -50,42 +86,16 @@ const Settings: React.FC = () => {
         layout="vertical"
         onFinish={values => updateConfig.mutate(values)}
       >
-        <Form.Item
-          label="监控 UID 列表（用逗号分隔）"
-          name="monitor_mids"
-          rules={[{ required: true, message: '请输入要监控的主播 UID' }]}
-        >
-          <TextArea 
-            placeholder="例如：114514,1919810" 
-            autoSize={{ minRows: 2 }}
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="检查间隔（秒）"
-          name="check_interval"
-          rules={[{ required: true, message: '请输入检查间隔' }]}
-        >
-          <InputNumber min={30} max={3600} style={{ width: 200 }} />
-        </Form.Item>
-
-        <Form.Item
-          label="B站 Cookies"
-          name="bilibili_cookies"
-        >
-          <TextArea 
-            placeholder="可选：用于获取更详细的信息" 
-            autoSize={{ minRows: 3 }}
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="Server酱 Key"
-          name="server_chan_key"
-        >
-          <Input placeholder="可选：用于推送通知" />
-        </Form.Item>
-
+        {configItems.map(item => (
+          <Form.Item
+            key={item.key}
+            label={item.label}
+            name={item.key}
+            rules={[{ required: true, message: '请输入要监控的主播 UID' }]}
+          >
+            {item.type === 'text' ? <Input placeholder="请输入" /> : item.type === 'password' ? <Input.Password placeholder="请输入" /> : item.type === 'textarea' ? <TextArea autoSize={{ minRows: 2 }} /> : <InputNumber min={30} max={3600} style={{ width: 200 }} />}
+          </Form.Item>
+        ))}
         <Form.Item>
           <Space>
             <Button 
