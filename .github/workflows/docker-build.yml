@@ -46,17 +46,14 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: |
             ${{ env.GHCR_REGISTRY }}/${{ env.OWNER_LOWER }}/bilibili-live-tools-ui:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push to QingCloud Registry (amd64)
+      - name: Build and push to QingCloud Registry
         run: |
-          docker buildx build \
-            --platform linux/amd64 \
-            --tag ${{ env.QINGCLOUD_REGISTRY }}/${{ secrets.QINGCLOUD_NAMESPACE }}/bilibili-live-tools-ui:latest \
-            --push \
-            .
+          docker build -t ${{ env.QINGCLOUD_REGISTRY }}/${{ secrets.QINGCLOUD_NAMESPACE }}/bilibili-live-tools-ui:latest .
+          docker push ${{ env.QINGCLOUD_REGISTRY }}/${{ secrets.QINGCLOUD_NAMESPACE }}/bilibili-live-tools-ui:latest
