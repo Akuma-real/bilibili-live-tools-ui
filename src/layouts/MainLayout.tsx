@@ -6,6 +6,7 @@ import {
   SettingOutlined,
   LogoutOutlined,
   MenuOutlined,
+  UserAddOutlined,
 } from '@ant-design/icons';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 
@@ -29,6 +30,15 @@ const MainLayout: React.FC = () => {
       label: '监控面板',
       onClick: () => {
         navigate('/dashboard');
+        setDrawerOpen(false);
+      }
+    },
+    {
+      key: 'subscribers',
+      icon: <UserAddOutlined />,
+      label: '订阅管理',
+      onClick: () => {
+        navigate('/subscribers');
         setDrawerOpen(false);
       }
     },
