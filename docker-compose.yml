@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    platform: linux/amd64
+    container_name: bilibili-live-tools-ui
+    ports:
+      - "8880:80"
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-https://bili-monitor.june.ink}
+    restart: unless-stopped
