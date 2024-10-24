@@ -27,7 +27,6 @@ const Settings: React.FC = () => {
     }
   });
 
-  // 将 onSuccess 逻辑移到这里
   React.useEffect(() => {
     if (configData) {
       form.setFieldsValue({

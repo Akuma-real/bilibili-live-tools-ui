@@ -15,7 +15,6 @@ export interface ConfigResponse {
   cloudflare_auth_code: string;
   server_chan_key: string;
   bilibili_cookies: string;
-  monitor_mids: string;
   check_interval: string;
 }
 
@@ -32,10 +31,11 @@ export interface LiverInfo {
 }
 
 export interface MonitorConfig {
-  monitor_mids: string[];  // 监控的主播 UID 列表
-  check_interval: number;  // 监控间隔（秒）
-  bilibili_cookies?: string;  // B站 Cookies
-  server_chan_key?: string;  // Server酱推送 Key
+  cloudflare_domain?: string;
+  cloudflare_auth_code?: string;
+  server_chan_key?: string;
+  bilibili_cookies?: string;
+  check_interval?: number;
 }
 
 export interface HTTPValidationError {
