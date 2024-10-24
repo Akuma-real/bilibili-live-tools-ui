@@ -2,10 +2,10 @@ import React from 'react';
 import { Card, Table, Tag, Button, Space } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 import request from '../utils/request';
-import type { MonitorStatus, LiverStatus } from '../types/api';
+import type { MonitorStatus } from '../types/api';
 
 const Dashboard: React.FC = () => {
-  const { data: monitorData } = useQuery<MonitorStatus>({
+  const { data: monitorData, refetch } = useQuery<MonitorStatus>({
     queryKey: ['monitor'],
     queryFn: async () => {
       const response = await request.get<MonitorStatus>('/monitor/status');
@@ -13,15 +13,6 @@ const Dashboard: React.FC = () => {
     },
     refetchInterval: 10000, // 每10秒刷新一次
   });
-
-  const liverList = React.useMemo(() => {
-    if (!monitorData?.status_cache) return [];
-    return Object.entries(monitorData.status_cache).map(([mid, status]) => ({
-      key: mid,
-      ...status,
-      mid
-    }));
-  }, [monitorData]);
 
   // 转换数据格式以适应表格
   const livers = React.useMemo(() => {
