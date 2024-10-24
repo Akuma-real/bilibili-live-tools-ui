@@ -10,16 +10,20 @@ const Login: React.FC = () => {
   const handleSubmit = async (values: { apiKey: string }) => {
     setLoading(true);
     try {
-      // 验证 API Key
-      await request.get('/auth/verify', {
+      // 使用 /config/ 端点验证 API Key
+      await request.get('/config/', {
         headers: {
           'X-API-Key': values.apiKey
         } as any
       });
       login(values.apiKey);
       message.success('登录成功');
-    } catch (error) {
-      message.error('API Key 无效');
+    } catch (error: any) {
+      if (error?.detail === 'Not authenticated') {
+        message.error('API Key 无效');
+      } else {
+        message.error('验证失败，请稍后重试');
+      }
     } finally {
       setLoading(false);
     }
